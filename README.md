@@ -12,8 +12,8 @@ A multi-threaded download accelerator written in Java that speeds up file downlo
 *   [Configuration](#configuration)
 *   [Error Handling and Logging](#error-handling-and-logging)
 *   [Security](#security)
+*   [Demonstration](#Demonstration)
 *   [Contributing](#contributing)
-*   [License](#license)
 *   [Acknowledgements](#acknowledgements)
 
 ## Features
@@ -118,6 +118,15 @@ Check the console output for error messages and warnings.  Examine the log files
 *   **HTTPS:**  Always use HTTPS URLs whenever possible to ensure that the downloaded data is encrypted in transit.
 *   **Backup Mechanism:** Implemented a backup mechanism when saving metadata to prevent data loss in case of failures.
 *   **Key Generation:** If the key file does not exist, a new AES key is generated using a `SecureRandom` instance.
+
+## Demonstration
+
+Here's a short video demonstrating the key features of the Download Accelerator:
+
+<video width="640" height="480" controls>
+  <source src="demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ## Contributing
 
