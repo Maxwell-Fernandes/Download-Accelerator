@@ -123,10 +123,7 @@ Check the console output for error messages and warnings.  Examine the log files
 
 Here's a short video demonstrating the key features of the Download Accelerator:
 
-<video width="640" height="480" controls>
-  <source src="demo.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+![Demonstration of Download Accelerator](demo(1).gif)
 
 ## Contributing
 
