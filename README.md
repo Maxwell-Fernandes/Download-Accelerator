@@ -123,7 +123,7 @@ Check the console output for error messages and warnings.  Examine the log files
 
 Here's a short video demonstrating the key features of the Download Accelerator:
 
-![Demonstration of Download Accelerator](demo(1).gif)
+![Demonstration of Download Accelerator](demoo.gif)
 
 ## Contributing
 
