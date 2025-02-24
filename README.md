@@ -13,6 +13,7 @@ A multi-threaded download accelerator written in Java that speeds up file downlo
 *   [Error Handling and Logging](#error-handling-and-logging)
 *   [Security](#security)
 *   [Demonstration](#Demonstration)
+*   [Testing Downloads](#testing-downloads)
 *   [Contributing](#contributing)
 *   [Acknowledgements](#acknowledgements)
 
@@ -85,10 +86,6 @@ The `DownloadAccelerator` class orchestrates the download process. Here's a brea
 10. **Metadata Updates:**  The `downloadedBytes` counter is updated atomically using `AtomicLong` to ensure thread safety.  Metadata is periodically saved to disk.
 11. **Completion:** Once all chunks are downloaded, the metadata is deleted, and a success message is displayed. If any chunk fails after multiple retries, an error message is shown.
 
-The `ChunkDownloader` class handles the actual downloading of individual chunks. It uses `HttpURLConnection` to make ranged requests, specifying the start and end bytes for each chunk.
-
-The `MetadataStore` class handles the saving and loading of download metadata to disk. It serializes the `Metadata` object and stores it in a file with the `.dwnld` extension. Encryption is used to secure the metadata.
-
 ## Configuration
 
 *   **`NUM_THREADS`:**  The number of threads to use for downloading.  This value is defined as a constant in the `DownloadAccelerator` class.  Experiment with different values to find the optimal setting for your network and system.  A higher number of threads may not always result in faster downloads.
@@ -121,9 +118,18 @@ Check the console output for error messages and warnings.  Examine the log files
 
 ## Demonstration
 
-Here's a short video demonstrating the key features of the Download Accelerator:
+This demonstration shows the Download Accelerator's key features, including multi-threaded downloading, pausing, and resuming.
 
 ![Demonstration of Download Accelerator](demoo.gif)
+
+## Testing Downloads
+
+To test the Download Accelerator, you can use the following URLs:
+
+*   **Large File (for testing multi-threading):**  `https://github.com/szalony9szymek/large/releases/download/free/large` (This is a Git repository, so the download will likely be the repository as a ZIP file).
+*   **Small File (100-200 MB range):** `https://gist.github.com/SeunghoonBaek/f35e0fd3db80bf55c2707cae5d0f7184` (This is a GitHub Gist,checkout for download links).
+
+**Note:**  The actual size and type of the downloaded file might vary depending on how GitHub serves the files from these URLs. These are good for testing overall download functionality.
 
 ## Contributing
 
