@@ -1,11 +1,12 @@
 import java.io.*;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.util.Base64;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class MetadataStore {
@@ -13,7 +14,9 @@ public class MetadataStore {
     private static final Logger LOGGER = Logger.getLogger(MetadataStore.class.getName());
     private static final boolean DEBUG_MODE = true;
     private static final String KEY_FILE = "metadata.key";
-    private static final String ALGORITHM = "AES";
+    private static final String ALGORITHM = "AES/GCM/NoPadding";
+    private static final int GCM_IV_LENGTH = 12; // 96 bits recommended for GCM
+    private static final int GCM_TAG_LENGTH = 128; // 128 bits authentication tag
 
     private static Key secretKey = loadOrGenerateKey();
 
@@ -22,15 +25,15 @@ public class MetadataStore {
         if (keyFile.exists()) {
             try (FileInputStream fis = new FileInputStream(keyFile)) {
                 byte[] keyBytes = fis.readAllBytes();
-                return new SecretKeySpec(keyBytes, ALGORITHM);
+                return new SecretKeySpec(keyBytes, "AES");
             } catch (IOException e) {
                 LOGGER.log(Level.SEVERE, "Failed to load encryption key, generating new one.", e);
             }
         }
 
         try {
-            KeyGenerator keyGen = KeyGenerator.getInstance(ALGORITHM);
-            keyGen.init(128, new SecureRandom());
+            KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+            keyGen.init(256, new SecureRandom()); // Use 256-bit key for better security
             Key newKey = keyGen.generateKey();
             try (FileOutputStream fos = new FileOutputStream(KEY_FILE)) {
                 fos.write(newKey.getEncoded());
@@ -103,9 +106,23 @@ public class MetadataStore {
 
     private static byte[] encrypt(byte[] data) throws IOException {
         try {
+            // Generate random IV for GCM
+            byte[] iv = new byte[GCM_IV_LENGTH];
+            SecureRandom random = new SecureRandom();
+            random.nextBytes(iv);
+
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey);
-            return cipher.doFinal(data);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey, parameterSpec);
+
+            byte[] encryptedData = cipher.doFinal(data);
+
+            // Prepend IV to encrypted data (IV + encrypted data)
+            byte[] combined = new byte[iv.length + encryptedData.length];
+            System.arraycopy(iv, 0, combined, 0, iv.length);
+            System.arraycopy(encryptedData, 0, combined, iv.length, encryptedData.length);
+
+            return combined;
         } catch (Exception e) {
             throw new IOException("Error encrypting metadata", e);
         }
@@ -113,9 +130,15 @@ public class MetadataStore {
 
     private static byte[] decrypt(byte[] data) throws IOException {
         try {
+            // Extract IV from the beginning of the data
+            byte[] iv = Arrays.copyOfRange(data, 0, GCM_IV_LENGTH);
+            byte[] encryptedData = Arrays.copyOfRange(data, GCM_IV_LENGTH, data.length);
+
             Cipher cipher = Cipher.getInstance(ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, secretKey);
-            return cipher.doFinal(data);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(GCM_TAG_LENGTH, iv);
+            cipher.init(Cipher.DECRYPT_MODE, secretKey, parameterSpec);
+
+            return cipher.doFinal(encryptedData);
         } catch (Exception e) {
             throw new IOException("Error decrypting metadata", e);
         }
